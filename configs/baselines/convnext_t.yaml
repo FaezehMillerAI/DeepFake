@@ -1,0 +1,7 @@
+_base_: ../default.yaml
+name: baseline_convnext_t
+model:
+  arch: convnext_t
+train:
+  epochs: 8
+  lr: 5.0e-5

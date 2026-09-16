@@ -1,0 +1,62 @@
+{
+  "resnet18": {
+    "name": "ResNet-18",
+    "citation": "He et al. (2016)",
+    "params_m": 11.18,
+    "seeds_available": 0,
+    "accuracy": "Pending",
+    "ece": "Pending",
+    "brier": "Pending",
+    "status": "Queued on Kaggle"
+  },
+  "mobilenetv3_s": {
+    "name": "MobileNetV3-S",
+    "citation": "Howard et al. (2019)",
+    "params_m": 1.52,
+    "seeds_available": 0,
+    "accuracy": "Pending",
+    "ece": "Pending",
+    "brier": "Pending",
+    "status": "Queued on Kaggle"
+  },
+  "efficientnet_b0": {
+    "name": "EfficientNet-B0",
+    "citation": "Tan & Le (2019)",
+    "params_m": 4.01,
+    "seeds_available": 0,
+    "accuracy": "Pending",
+    "ece": "Pending",
+    "brier": "Pending",
+    "status": "Queued on Kaggle"
+  },
+  "convnext_t": {
+    "name": "ConvNeXt-T",
+    "citation": "Liu et al. (2022)",
+    "params_m": 27.82,
+    "seeds_available": 0,
+    "accuracy": "Pending",
+    "ece": "Pending",
+    "brier": "Pending",
+    "status": "Queued on Kaggle"
+  },
+  "vit_b_16": {
+    "name": "ViT-B/16",
+    "citation": "Dosovitskiy et al. (2021)",
+    "params_m": 85.8,
+    "seeds_available": 0,
+    "accuracy": "Pending",
+    "ece": "Pending",
+    "brier": "Pending",
+    "status": "Queued on Kaggle"
+  },
+  "arcnet": {
+    "name": "ARC-Net",
+    "citation": "PLOS ONE (2026)",
+    "params_m": 8.11,
+    "seeds_available": 0,
+    "accuracy": "Pending",
+    "ece": "Pending",
+    "brier": "Pending",
+    "status": "Queued on Kaggle"
+  }
+}

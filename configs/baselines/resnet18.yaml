@@ -1,0 +1,7 @@
+_base_: ../default.yaml
+name: baseline_resnet18
+model:
+  arch: resnet18
+train:
+  epochs: 8
+  lr: 1.0e-4

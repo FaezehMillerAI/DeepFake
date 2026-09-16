@@ -1,0 +1,7 @@
+_base_: ../default.yaml
+name: baseline_mobilenetv3_s
+model:
+  arch: mobilenetv3_s
+train:
+  epochs: 8
+  lr: 2.0e-4
