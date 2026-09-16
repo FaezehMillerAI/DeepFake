@@ -219,3 +219,7 @@ def validate_pseudo_masks(
         "gate_g0_passed": bool(mean_iou >= gate_g0_threshold),
         "ious": [round(x, 4) for x in ious],
     }
+
+
+# Aliases
+evaluate_pseudo_mask_viability = validate_pseudo_masks

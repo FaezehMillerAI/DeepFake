@@ -69,3 +69,8 @@ def brier(probs, labels) -> float:
     onehot = np.zeros_like(p)
     onehot[np.arange(len(y)), y] = 1.0
     return float(np.mean(np.sum((p - onehot) ** 2, axis=1)))
+
+
+# Aliases
+expected_calibration_error = ece
+brier_score = brier

@@ -595,7 +595,12 @@ const GATES = [
 
 const TOTAL_GPU = WEEKS.reduce((s,w)=>s+w.gpu,0);
 const KEY = "gracedf.v1";
-let state = {tasks:{}, gates:{}, gpu:{}};
+const DEFAULT_TASKS = {
+  w1t0:true, w1t1:true, w1t2:true, w1t3:true, w1t4:true, w1t5:true, w1t6:true, w1t7:true, w1t8:true,
+  w2t1:true, w2t2:true, w2t5:true, w2t6:true, w2t8:true, w2t10:true,
+  w3t2:true, w3t3:true
+};
+let state = {tasks: Object.assign({}, DEFAULT_TASKS), gates:{}, gpu:{w1:2, w2:3}};
 
 const urlParams = new URLSearchParams(window.location.search);
 const ROOM_ID = urlParams.get("room") || localStorage.getItem("gracedf_room") || "gracedf_faezehmiller_main_v1";

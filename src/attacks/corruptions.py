@@ -23,6 +23,10 @@ def _to_pil(img) -> Image.Image:
     if isinstance(img, Image.Image):
         return img.convert("RGB")
     arr = np.asarray(img)
+    if arr.ndim == 3 and arr.shape[0] in [1, 3]:
+        arr = arr.transpose(1, 2, 0)
+        if arr.shape[-1] == 1:
+            arr = arr.squeeze(-1)
     if arr.dtype != np.uint8:
         arr = np.clip(arr * 255.0 if arr.max() <= 1.0 else arr, 0, 255).astype(np.uint8)
     return Image.fromarray(arr).convert("RGB")

@@ -43,6 +43,11 @@ def fgsm(model, x, y, eps: float = 4 / 255, loss_fn=None, clip: tuple = (0.0, 1.
     return pgd(model, x, y, eps=eps, alpha=eps, steps=1, loss_fn=loss_fn, clip=clip)
 
 
+# Aliases
+pgd_attack = pgd
+fgsm_attack = fgsm
+
+
 # ---------------------------------------------------------------------------
 # Week 6 — the novel attack. Implement when E3 starts.
 #
