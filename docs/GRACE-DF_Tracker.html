@@ -594,13 +594,22 @@ const GATES = [
 ];
 
 const TOTAL_GPU = WEEKS.reduce((s,w)=>s+w.gpu,0);
-const KEY = "gracedf.v1";
+const KEY = "gracedf.v2";
 const DEFAULT_TASKS = {
+  // Week 1: All 9 foundational metrics, test harness, corruptions, and CF
   w1t0:true, w1t1:true, w1t2:true, w1t3:true, w1t4:true, w1t5:true, w1t6:true, w1t7:true, w1t8:true,
-  w2t0:true, w2t1:true, w2t2:true, w2t4:true, w2t5:true, w2t6:true, w2t8:true, w2t9:true, w2t10:true,
-  w3t2:true, w3t3:true
+  // Week 2: Data pipeline, pseudo-mask yield, WebDataset sharding, 5K pristine PNG, frequency maps, INP-X & GenShield
+  w2t0:true, w2t1:true, w2t2:true, w2t3:true, w2t4:true, w2t5:true, w2t6:true, w2t7:true, w2t8:true, w2t9:true, w2t10:true,
+  // Week 3: Baselines, CAM/Rollout explainers, Eval stack, Positioning matrix
+  w3t0:true, w3t1:true, w3t2:true, w3t3:true, w3t5:true,
+  // Week 4: PGD/FGSM, ARC-Net, Adaptive Fusion, Statistical tests
+  w4t0:true, w4t2:true, w4t3:true, w4t5:true
 };
-let state = {tasks: Object.assign({}, DEFAULT_TASKS), gates:{}, gpu:{w1:2, w2:3}};
+let state = {
+  tasks: Object.assign({}, DEFAULT_TASKS),
+  gates: { G0: "passed" },
+  gpu: { w1: 2, w2: 5, w3: 8 }
+};
 
 const urlParams = new URLSearchParams(window.location.search);
 const ROOM_ID = urlParams.get("room") || localStorage.getItem("gracedf_room") || "gracedf_faezehmiller_main_v1";
@@ -611,7 +620,15 @@ let saveTimer = null;
 let gunRoom = null;
 const bc = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("gracedf_" + ROOM_ID) : null;
 
-try{ const raw = localStorage.getItem(KEY); if(raw) state = Object.assign(state, JSON.parse(raw)); }catch(e){}
+try{
+  const raw = localStorage.getItem(KEY);
+  if(raw){
+    const parsed = JSON.parse(raw);
+    state.tasks = Object.assign({}, DEFAULT_TASKS, parsed.tasks || {});
+    state.gates = Object.assign({ G0: "passed" }, parsed.gates || {});
+    state.gpu = Object.assign({ w1: 2, w2: 5, w3: 8 }, parsed.gpu || {});
+  }
+}catch(e){}
 
 /* ---------- current week ---------- */
 function weekPosition(){
@@ -788,9 +805,9 @@ function applyRemoteState(remoteState, timestamp){
   if(timestamp && timestamp <= lastLocalWrite) return;
   lastLocalWrite = timestamp || Date.now();
   state = {
-    tasks: remoteState.tasks || {},
-    gates: remoteState.gates || {},
-    gpu: remoteState.gpu || {}
+    tasks: Object.assign({}, DEFAULT_TASKS, remoteState.tasks || {}),
+    gates: Object.assign({ G0: "passed" }, remoteState.gates || {}),
+    gpu: Object.assign({ w1: 2, w2: 5, w3: 8 }, remoteState.gpu || {})
   };
   try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
   refresh();
