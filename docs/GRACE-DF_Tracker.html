@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GRACE-DF Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root{
+  --paper:#f5f5f8;
+  --surface:#ffffff;
+  --surface-2:#fafafc;
+  --ink:#16151c;
+  --ink-2:#57545f;
+  --ink-3:#8b8794;
+  --line:#e3e1e8;
+  --line-2:#cfccd7;
+  --accent:#a3236e;
+  --accent-2:#7d1a54;
+  --accent-soft:#fbeaf3;
+  --pass:#2f7150;
+  --pass-soft:#e6f2eb;
+  --warn:#8f6410;
+  --warn-soft:#f8efdc;
+  --risk:#a83a2f;
+  --risk-soft:#fbe9e6;
+  --track:#e9e7ee;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(22,21,28,.05), 0 6px 18px -12px rgba(22,21,28,.25);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#100f14;
+    --surface:#191821;
+    --surface-2:#1e1d27;
+    --ink:#ecebf2;
+    --ink-2:#a6a2b3;
+    --ink-3:#726e80;
+    --line:#2a2834;
+    --line-2:#3a3746;
+    --accent:#e574b3;
+    --accent-2:#f09ac9;
+    --accent-soft:#2c1a26;
+    --pass:#6bbd92;
+    --pass-soft:#182a22;
+    --warn:#d8a94f;
+    --warn-soft:#2b2418;
+    --risk:#e28477;
+    --risk-soft:#2d1c19;
+    --track:#26242f;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 6px 18px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#100f14;
+  --surface:#191821;
+  --surface-2:#1e1d27;
+  --ink:#ecebf2;
+  --ink-2:#a6a2b3;
+  --ink-3:#726e80;
+  --line:#2a2834;
+  --line-2:#3a3746;
+  --accent:#e574b3;
+  --accent-2:#f09ac9;
+  --accent-soft:#2c1a26;
+  --pass:#6bbd92;
+  --pass-soft:#182a22;
+  --warn:#d8a94f;
+  --warn-soft:#2b2418;
+  --risk:#e28477;
+  --risk-soft:#2d1c19;
+  --track:#26242f;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 6px 18px -12px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:"Source Serif 4",Georgia,serif;font-weight:600;text-wrap:balance;margin:0}
+a{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- header ---------- */
+.top{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.top-in{
+  max-width:1040px;margin:0 auto;padding:14px 22px;
+  display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+}
+.ring{flex:0 0 auto;position:relative;width:62px;height:62px}
+.ring svg{transform:rotate(-90deg);display:block}
+.ring-num{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:600;
+  font-variant-numeric:tabular-nums;letter-spacing:-.03em;
+}
+.brand{flex:1 1 220px;min-width:0}
+.brand h1{font-size:20px;letter-spacing:-.01em;line-height:1.15}
+.brand p{margin:1px 0 0;font-size:12.5px;color:var(--ink-3);letter-spacing:.01em}
+.stats{display:flex;gap:0;flex-wrap:wrap}
+.stat{padding:0 16px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:0;padding-left:0}
+.stat .k{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-3);font-weight:500}
+.stat .v{display:block;font-family:"IBM Plex Mono",monospace;font-size:16px;font-weight:500;font-variant-numeric:tabular-nums;margin-top:2px}
+.stat .v small{font-size:11.5px;color:var(--ink-3);font-weight:400}
+
+/* ---------- phase rail ---------- */
+.rail-wrap{border-bottom:1px solid var(--line);background:var(--surface-2)}
+.rail{max-width:1040px;margin:0 auto;padding:10px 22px;display:flex;gap:4px;overflow-x:auto}
+.ph{
+  flex:1 1 0;min-width:96px;text-align:left;background:none;border:0;padding:6px 8px 7px;
+  border-radius:7px;color:inherit;transition:background .15s;
+}
+.ph:hover{background:var(--surface)}
+.ph .pn{display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:500;white-space:nowrap}
+.ph .pl{display:block;font-size:12.5px;font-weight:500;margin:1px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph .bar{display:block}
+.ph .bar{height:3px;background:var(--track);border-radius:2px;overflow:hidden}
+.ph .bar i{display:block;height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+
+/* ---------- layout ---------- */
+main{max-width:1040px;margin:0 auto;padding:26px 22px 90px}
+.lede{
+  display:flex;gap:24px;flex-wrap:wrap;align-items:baseline;
+  padding-bottom:20px;margin-bottom:26px;border-bottom:1px solid var(--line);
+}
+.lede p{margin:0;max-width:60ch;color:var(--ink-2);font-size:14.5px}
+.lede p b{color:var(--ink);font-weight:600}
+.toolbar{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.btn{
+  background:var(--surface);border:1px solid var(--line-2);color:var(--ink-2);
+  padding:5px 11px;border-radius:6px;font-size:12.5px;font-weight:500;transition:.15s;
+}
+.btn:hover{border-color:var(--ink-3);color:var(--ink)}
+.btn.danger{color:var(--risk);border-color:var(--risk)}
+.sync{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ink-3);flex:0 0 auto}
+.dot.on{background:var(--pass)}
+
+/* ---------- week ---------- */
+.wk{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  margin-bottom:10px;overflow:hidden;
+}
+.wk.now{border-color:var(--accent);box-shadow:var(--shadow)}
+.wk.done{background:var(--surface-2)}
+.wk>summary{
+  list-style:none;cursor:pointer;padding:13px 16px;display:grid;
+  grid-template-columns:52px 1fr auto;gap:14px;align-items:center;
+}
+.wk>summary::-webkit-details-marker{display:none}
+.wk>summary:hover{background:var(--surface-2)}
+.wnum{
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  text-align:center;line-height:1.1;
+}
+.wnum b{display:block;font-size:19px;font-weight:600;letter-spacing:-.04em}
+.wnum span{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.wmain{min-width:0}
+.wgoal{font-family:"Source Serif 4",Georgia,serif;font-size:16.5px;line-height:1.3;letter-spacing:-.005em}
+.wmeta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:5px;font-size:11.5px;color:var(--ink-3)}
+.wmeta .date{font-family:"IBM Plex Mono",monospace}
+.tag{
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+  padding:2px 6px;border-radius:4px;
+}
+.tag.now{background:var(--accent-soft);color:var(--accent-2)}
+.tag.hol{background:var(--warn-soft);color:var(--warn)}
+.tag.buf{background:var(--pass-soft);color:var(--pass)}
+.wright{display:flex;align-items:center;gap:12px}
+.wcount{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.wbar{width:74px;height:5px;background:var(--track);border-radius:3px;overflow:hidden;flex:0 0 auto}
+.wbar i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px;transition:width .25s}
+.wbar.full i{background:var(--pass)}
+.chev{color:var(--ink-3);transition:transform .2s;flex:0 0 auto}
+.wk[open] .chev{transform:rotate(90deg)}
+
+.wbody{padding:2px 16px 15px 82px;border-top:1px solid var(--line)}
+@media(max-width:620px){.wbody{padding-left:16px}.wk>summary{grid-template-columns:44px 1fr;gap:10px}.wright{grid-column:1/-1;justify-content:flex-start;padding-left:54px}}
+ul.tasks{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:1px}
+ul.tasks li{display:flex;gap:10px;align-items:flex-start;padding:4px 6px;border-radius:6px}
+ul.tasks li:hover{background:var(--surface-2)}
+ul.tasks input{
+  appearance:none;-webkit-appearance:none;margin:3px 0 0;flex:0 0 auto;
+  width:15px;height:15px;border:1.5px solid var(--line-2);border-radius:4px;
+  background:var(--surface);cursor:pointer;transition:.12s;position:relative;
+}
+ul.tasks input:hover{border-color:var(--accent)}
+ul.tasks input:checked{background:var(--accent);border-color:var(--accent)}
+ul.tasks input:checked::after{
+  content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg);
+}
+ul.tasks label{cursor:pointer;font-size:14px;line-height:1.45;color:var(--ink)}
+ul.tasks input:checked+label{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line-2)}
+ul.tasks li.key label{font-weight:600}
+ul.tasks li.key label::after{content:" ●";color:var(--accent);font-size:9px;vertical-align:2px}
+
+.wfoot{
+  display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  margin-top:14px;padding-top:11px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--ink-2);
+}
+.deliv{max-width:56ch}
+.deliv b{color:var(--ink-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;display:block}
+.gpu{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.gpu label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.gpu input{
+  width:52px;padding:3px 7px;border:1px solid var(--line-2);border-radius:5px;
+  background:var(--surface);color:var(--ink);text-align:right;
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-variant-numeric:tabular-nums;
+}
+.gpu .of{color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+.gpu.over input{border-color:var(--risk);color:var(--risk)}
+
+/* ---------- gate ---------- */
+.gate{
+  margin:22px 0;padding:16px 18px;border-radius:var(--radius);
+  border:1px solid var(--line-2);border-left:3px solid var(--ink-3);
+  background:var(--surface);
+}
+.gate.star{border-left-color:var(--accent)}
+.gate.st-pass{border-left-color:var(--pass);background:var(--pass-soft)}
+.gate.st-fall{border-left-color:var(--warn);background:var(--warn-soft)}
+.gate-head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.gate-id{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;
+  letter-spacing:.06em;color:var(--accent);
+}
+.gate-name{font-family:"Source Serif 4",Georgia,serif;font-size:16px;font-weight:600}
+.gate-due{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3);margin-left:auto}
+.gate-q{margin:8px 0 0;font-size:13.5px;color:var(--ink-2);max-width:66ch}
+.gate-opts{margin:11px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.gate-opts li{font-size:12.5px;color:var(--ink-2);display:flex;gap:9px;align-items:baseline}
+.gate-opts .cond{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:500;
+  flex:0 0 128px;color:var(--ink);
+}
+.seg{display:flex;gap:0;margin-top:13px;border:1px solid var(--line-2);border-radius:7px;overflow:hidden;width:max-content;max-width:100%}
+.seg button{
+  background:var(--surface);border:0;border-left:1px solid var(--line-2);
+  padding:5px 13px;font-size:12px;font-weight:500;color:var(--ink-2);transition:.15s;
+}
+.seg button:first-child{border-left:0}
+.seg button:hover{background:var(--surface-2);color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button.p[aria-pressed="true"]{background:var(--pass);color:#fff}
+.seg button.f[aria-pressed="true"]{background:var(--warn);color:#fff}
+
+/* ---------- phase heading ---------- */
+.phase-h{
+  display:flex;align-items:baseline;gap:12px;margin:34px 0 12px;
+  padding-bottom:7px;border-bottom:2px solid var(--ink);
+}
+.phase-h:first-of-type{margin-top:0}
+.phase-h .rn{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--accent)}
+.phase-h h2{font-size:18px;letter-spacing:-.01em}
+.phase-h .wr{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3)}
+
+footer{
+  max-width:1040px;margin:0 auto;padding:0 22px 60px;
+  color:var(--ink-3);font-size:12.5px;
+}
+footer hr{border:0;border-top:1px solid var(--line);margin:0 0 16px}
+footer p{margin:0 0 6px;max-width:70ch}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="ring">
+      <svg width="62" height="62" viewBox="0 0 62 62" aria-hidden="true">
+        <circle cx="31" cy="31" r="26" fill="none" stroke="var(--track)" stroke-width="6"></circle>
+        <circle id="ringArc" cx="31" cy="31" r="26" fill="none" stroke="var(--accent)" stroke-width="6"
+                stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="163.4"
+                style="transition:stroke-dashoffset .4s"></circle>
+      </svg>
+      <div class="ring-num" id="ringNum">0%</div>
+    </div>
+    <div class="brand">
+      <h1>GRACE-DF Tracker</h1>
+      <p>24-week programme &middot; 7 Sep 2026 &rarr; 12 Feb 2027</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="k">Tasks</span><span class="v" id="sTasks">0<small>/0</small></span></div>
+      <div class="stat"><span class="k">GPU logged</span><span class="v" id="sGpu">0<small>/332 h</small></span></div>
+      <div class="stat"><span class="k">Gates</span><span class="v" id="sGates">0<small>/6</small></span></div>
+      <div class="stat"><span class="k">Position</span><span class="v" id="sWeek">&mdash;</span></div>
+    </div>
+  </div>
+  <div class="rail-wrap"><div class="rail" id="rail"></div></div>
+</header>
+
+<main>
+  <div class="lede">
+    <p>Every week has <b>one goal</b>. Gates are decision points, not milestones — at a gate you either continue or take the named fallback. <b>Weeks 14 and 21 are protected buffer</b>; don't schedule into them in advance.</p>
+    <div class="toolbar">
+      <span class="sync"><i class="dot on" id="syncDot"></i><span id="syncTxt">saved in this browser</span></span>
+      <button class="btn" id="btnSave">Save to file</button>
+      <label class="btn" for="fileLoad" style="display:inline-block">Load file</label>
+      <input type="file" id="fileLoad" accept="application/json,.json" hidden>
+      <button class="btn" id="btnExpand">Expand all</button>
+      <button class="btn danger" id="btnReset">Reset</button>
+    </div>
+  </div>
+  <div id="timeline"></div>
+</main>
+
+<footer>
+  <hr>
+  <p><b>The five claims.</b>
+  <b>C1</b> evidence drift exists — the label survives degradation, the explanation doesn't ·
+  <b>C2</b> frequency tokens plus degradation-invariant training fix it ·
+  <b>C3</b> grounding is cheap — a sub-1B model matches a 24B agent ensemble ·
+  <b>C4</b> calibrated abstention converts robustness into utility ·
+  <b>C5</b> the explanation is causally verifiable — restore the predicted region and the verdict flips, restore a random one and it doesn't.</p>
+  <p><b>Two explanation axes:</b> is the evidence <i>stable</i> under perturbation (ESI), and is it <i>causally right</i> (CF)? No prior work reports both — which is the reason the rationale is visual rather than textual: a sentence cannot be tested this way.</p>
+  <p><b>Cut in this order if you fall behind:</b> Tier-B extras (LGrad, UnivFD, CnnSpot) → E8c fairness → the two-agent debate stretch goal → explanation-method breadth → seeds 3→2 on ablation rows only.</p>
+  <p><b>Never cut:</b> the metric definitions, the pseudo-mask validation number, G1's reproduction check, 3 seeds on headline results, or the statistical tests.</p>
+</footer>
+
+<script>
+const START = new Date("2026-09-07T00:00:00");
+const SUBMIT = new Date("2027-02-12T00:00:00");
+
+const PHASES = [
+  {r:"I",   name:"Foundations",  weeks:[1,2],     gpu:7},
+  {r:"II",  name:"Baselines",    weeks:[3,4],     gpu:45},
+  {r:"III", name:"The Discovery",weeks:[5,6,7],   gpu:65},
+  {r:"IV",  name:"The Method",   weeks:[8,9,10,11],gpu:112},
+  {r:"V",   name:"Evidence",     weeks:[12,13],   gpu:50},
+  {r:"VI",  name:"Buffer",       weeks:[14],      gpu:25},
+  {r:"VII", name:"Writing",      weeks:[15,16,17,18,19,20], gpu:20},
+  {r:"VIII",name:"Hardening",    weeks:[21,22,23,24], gpu:8}
+];
+
+const WEEKS = [
+{n:1,ph:0,dates:"7–13 Sep",gpu:2,goal:"Build the ruler before you measure anything.",
+ deliv:"src/metrics/ with a green test suite; README carrying the Kaggle constraints",
+ tasks:["Create repo: configs/ src/{data,models,metrics,attacks,train,eval}/ notebooks/ runs/ SESSION_LOG.md",
+  "Config system (dataclass + YAML), global seeding, git-SHA stamped on every run",
+  {t:"JSON run-logger — every table in the paper generates from these files, never typed",k:1},
+  {t:"Implement GAcc, ESI (SSIM + Spearman), ELD, LuA, ECE (15-bin), Brier",k:1},
+  "Unit tests: identical maps → ESI 1.0 · random → ≈0 · intensity-shifted → ESI_ρ stable",
+  "Corruption suite as a deterministic seeded bank: JPEG, blur, noise, downscale, WebP, resave chain",
+  "Record current Kaggle limits (GPU quota, session cap, /kaggle/working cap) in README",
+  "Confirm architecture: CNN dual-head is now the default — NL rationale is out of scope, so Florence-2 is optional",
+  {t:"Implement Counterfactual Faithfulness (CF): restore the predicted region from the true original, measure flip rate on an independent detector, with an equal-area random-region control",k:1}]},
+
+{n:2,ph:0,dates:"14–20 Sep",gpu:5,goal:"Find the number that decides the project.",
+ deliv:"pseudo_mask_validation.json · shards live on Kaggle · resume harness proven · two differentiation paragraphs written",
+ tasks:["Acquire SID-Set (annotated masks), MagicBrush, AutoSplice, CocoGlide",
+  "Acquire DFBench real + AI-edit subsets; sample AI-gen",
+  "Build pseudo-mask pipeline: LAB difference → blur σ=2 → Otsu → open/close → area rejection",
+  {t:"Validate pseudo-masks against SID-Set ground truth — record mean IoU",k:1},
+  "Report pseudo-mask yield per DFBench edit category (Style Change should mostly reject)",
+  "Build WebDataset shards; pre-resize to 384px; keep a 5K pristine-PNG subset",
+  "Pre-compute DCT / DWT / high-pass maps as fp16 .npy shards",
+  "Upload private Kaggle Datasets (≤40GB each); verify a loop reads >200 img/s",
+  {t:"Write the resume-from-checkpoint harness — kill a job at 50% and prove it resumes",k:1},
+  "Acquire the INP-X 90K benchmark — real / inpainted / exchanged triplets, all mask-paired (github.com/emirhanbilgic/INP-X)",
+  {t:"Read INP-X and GenShield in full; write one differentiation paragraph for each — these are the two direct novelty threats",k:1}]},
+
+{n:3,ph:1,dates:"21–27 Sep",gpu:20,goal:"Reproduce the field.",
+ deliv:"Table 1 of the paper (clean baselines), auto-generated",
+ tasks:["Train ResNet-18, MobileNetV3-S, EfficientNet-B0, ConvNeXt-T, ViT-B/16 — Shakya's exact five",
+  "Confirm Shakya Exp-1: near-perfect clean accuracy on all five",
+  "Explanation extraction: Grad-CAM, Score-CAM, Integrated Gradients, attention rollout",
+  "Run the full eval pipeline end-to-end on one model — smoke-test the whole stack",
+  "3 seeds each; mean ± std written into runs/",
+  {t:"Positioning sweep — ManipShield, FOCA, PATE-Forensics, LaP-Forensics, EditSleuth, FUSED, DiffusionPrint: confirm none of them measures explanation stability or counterfactual faithfulness",k:1}]},
+
+{n:4,ph:1,dates:"28 Sep – 4 Oct",gpu:25,goal:"Prove the pipeline is trustworthy.",
+ deliv:"Reproduction table with published-vs-yours columns",
+ tasks:["Implement PGD (ε ∈ {2,4,8}/255, 10 steps) and FGSM",
+  {t:"Run Shakya Exp-3: clean-train → adversarial-test",k:1},
+  "Reproduce ARC-Net (attention + residual EfficientNet-B0) from the PLOS ONE description",
+  "Implement DeepFakeBuster-style adaptive fusion w_i(I) over your five CNNs — not all 11 detectors",
+  "Clone and run CT-DFID from github.com/QinQin741/DTA-DFA-DA-model",
+  "Set up McNemar / bootstrap-CI / Holm–Bonferroni helpers in src/eval/stats.py"]},
+
+{n:5,ph:2,dates:"5–11 Oct",gpu:20,goal:"Does the evidence move? Run E2.",
+ deliv:"First version of Figure 1",
+ tasks:["Sweep every baseline × every corruption × every severity",
+  "Log Acc, ESI, ESI_ρ, GAcc, IoU, ECE, Brier at each point",
+  "Repeat for all four explanation methods — method-dependence is itself a finding",
+  {t:"Draft the money plot: x = severity, twin y = Accuracy (flat) vs ESI (collapsing)",k:1},
+  "Compute the ΔAcc / ΔESI quadrant scatter",
+  {t:"Measure CF at every corruption level too — does the evidence stay causally correct as well as stable?",k:1}]},
+
+{n:6,ph:2,dates:"12–18 Oct",gpu:25,goal:"Finish E2, start E3, decide what the paper is about.",
+ deliv:"Gate decision written into SESSION_LOG.md with the plot that justifies it",
+ tasks:["Finish the degradation sweep incl. compression chains and the pristine-PNG subset",
+  "Begin E3: PGD / FGSM evidence measurement",
+  {t:"Implement the evidence-targeted attack: maximise 1 − SSIM(M(I), M(I+δ)) with ŷ unchanged",k:1},
+  "Begin transfer attacks — craft on ResNet-18, evaluate on all"]},
+
+{n:7,ph:2,dates:"19–25 Oct",gpu:20,goal:"Bank the finding, then start building.",
+ deliv:"~4 pages of real paper prose; model scaffold compiles",
+ tasks:["Complete E3 including evidence-targeted and transfer attacks",
+  "Publication-quality Figure 1 + Figure 2 (attack version)",
+  {t:"Write Section 1 (Intro) and Section 3 (Evidence Drift) now — clarity peaks this week",k:1},
+  "Read Ghorbani et al. 'Interpretation of NNs is Fragile'; write the positioning paragraph",
+  "Scaffold GRACE-DF: frequency encoder, token concatenation, head stubs",
+  {t:"Write the INP-X differentiation into Related Work: they show evidence starts in the wrong place, you show it moves",k:1},
+  "Supervisor checkpoint: present Figure 1"]},
+
+{n:8,ph:3,dates:"26 Oct – 1 Nov",gpu:28,goal:"Get it training at all.",
+ deliv:"First GRACE-DF checkpoint with non-trivial IoU",
+ tasks:["Load Florence-2-base; verify grounding tokens work out of the box on samples",
+  "Wire FreqEncoder (3-layer conv over DCT + DWT + high-pass, shared grid) → f_tokens",
+  "Concatenate [v_tokens ; f_tokens ; prompt]; freeze the vision encoder",
+  "Implement L_cls + L_loc (Dice + BCE, or L1 on box tokens)",
+  "fp16 + GradScaler + grad-checkpointing — no bf16 on P100/T4; clamp logits, eps 1e-8",
+  {t:"Overfit a 200-image subset to loss ≈ 0 before any full run",k:1},
+  "Stage-1: 3–4 epochs, frozen backbone",
+  "Add the cue-attribution output: per-decision weight over the RGB / DCT / DWT / high-pass streams"]},
+
+{n:9,ph:3,dates:"2–8 Nov",gpu:28,goal:"The mechanism — degradation-invariant contrastive loss working.",
+ deliv:"First honest comparison table against the best CNN baseline",
+ tasks:["Implement L_DIC: InfoNCE, τ = 0.07, positives = same image under corruption T",
+  "Stage-2: unfreeze with LoRA (r=16, α=32, attention projections), 2–3 epochs",
+  "Effective batch 32 via accumulation; cosine LR 1e-4 → 1e-6; AdamW wd 0.01",
+  "First full eval: Acc, GAcc, IoU, ESI(JPEG50), ESI(PGD 4/255), ECE",
+  {t:"Compare against the best CNN baseline from Week 3",k:1}]},
+
+{n:10,ph:3,dates:"9–15 Nov",gpu:28,goal:"Tune it, then freeze it.",
+ deliv:"configs/grace_df_final.yaml + sweep table for the supplementary",
+ tasks:["Sweep λ_loc, λ_div, τ, LoRA rank — coarse grid, 3–4 points each, not a full factorial",
+  "Ablate frequency representation: DCT only / DWT only / high-pass only / all three",
+  "Fit temperature scaling on val; compute ECE before and after",
+  {t:"Freeze configs/grace_df_final.yaml — and do not touch it again",k:1}]},
+
+{n:11,ph:3,dates:"16–22 Nov",gpu:28,goal:"Three seeds of the final model, done properly.",
+ deliv:"Main results table with error bars",
+ tasks:["Train 3 seeds end-to-end with the frozen config",
+  "Full eval per seed; mean ± std everywhere",
+  "Efficiency: params, GFLOPs, ms/image on a single T4, peak VRAM",
+  "Archive all three checkpoints to a Kaggle Dataset",
+  "Supervisor checkpoint: main results"]},
+
+{n:12,ph:4,dates:"23–29 Nov",gpu:28,goal:"Build the table reviewers grade you on.",
+ deliv:"Ablation table + headline efficiency table",
+ tasks:["Ablation ladder: base → +freq tokens → +L_DIC → +loc head → +calibration → full",
+  "Columns: Acc · GAcc · IoU · ESI(JPEG50) · ESI(PGD 4/255) · ECE · params · ms/img",
+  "E6: MoA-DF zero-shot (Qwen2.5-7B + InternVL2.5-8B + InternVL3-9B, 4-bit, 5K subset)",
+  {t:"Cache every MoA-DF logit to disk — run once, never re-run",k:1},
+  "Target Object Enhance / Object Operation, where DFBench reports 15.89% / 18.68% zero-shot Acc",
+  "Efficiency comparison against MoA-DF's 24B",
+  {t:"Compute CF for every baseline's Grad-CAM map — expect them at or near the random-region control",k:1}]},
+
+{n:13,ph:4,dates:"30 Nov – 6 Dec",gpu:22,goal:"Close the remaining claims. All experiments complete.",
+ deliv:"Complete results directory; test set frozen",
+ tasks:["E7: split conformal on val; sweep coverage 100% → 70%",
+  "Risk–coverage curves for clean / degraded / adversarial",
+  "E8a: extra-type transfer (diffusion↔GAN) following CT-DFID's protocol",
+  "E8b: face↔general transfer (FF++ ↔ DFBench)",
+  "E8c: fairness — subgroup FPR, or per-generator FPR spread with the substitution stated",
+  {t:"Run the full statistical protocol: McNemar, bootstrap CIs, Holm–Bonferroni",k:1}]},
+
+{n:14,ph:5,dates:"7–13 Dec",gpu:25,goal:"Recover whatever slipped. Protected.",tag:"buffer",
+ deliv:"No open experimental questions",
+ tasks:["Re-run any failed or underpowered experiment",
+  "Fill missing seeds",
+  "Only if genuinely ahead: two-agent debate module (texture + semantic + arbiter)",
+  "Failure-case gallery: 20 images where GRACE-DF localises wrongly, categorised"]},
+
+{n:15,ph:6,dates:"14–20 Dec",gpu:8,goal:"Freeze the visuals.",
+ deliv:"`make figures` reproduces every visual in the paper",
+ tasks:["All figures at final quality — vector, consistent palette, colour-blind safe, legible in print",
+  {t:"All tables generated from runs/*.json by script — zero hand-typed numbers",k:1},
+  "Write Section 4 (GRACE-DF method) and Section 5 (Experimental Setup)",
+  "Build the figure/table manifest so a late re-run regenerates everything with one command"]},
+
+{n:16,ph:6,dates:"21–27 Dec",gpu:0,goal:"Related Work, written away from a GPU.",tag:"holiday",
+ deliv:"Section 2 drafted; references tidy",
+ tasks:["Section 2 (Related Work) full draft — the five baselines are the spine",
+  "Read: HiFi-IFDL, TruFor, IML-ViT, SIDA, CAT-Net, PSCC-Net, F3-Net, SPSL, FreqNet, LGrad, NPR",
+  "Reference manager tidy; consistent citation keys",
+  "Section 7 (Limitations) draft — image-only, pseudo-mask noise, no video/audio"]},
+
+{n:17,ph:6,dates:"28 Dec – 3 Jan",gpu:0,goal:"Everything that isn't the main paper.",tag:"holiday",
+ deliv:"Supplementary, dataset card, model card, licence audit",
+ tasks:["Supplementary: full hyper-parameter sweeps, extended ablations, failure gallery",
+  "Dataset card: sources, licences, pseudo-mask method, known limitations",
+  "Model card",
+  {t:"Licence audit for every dataset used — before submission, not after acceptance",k:1}]},
+
+{n:18,ph:6,dates:"4–10 Jan",gpu:2,goal:"Assemble the complete first draft.",
+ deliv:"Complete draft v1",
+ tasks:["Section 6 (Results) written against the frozen tables",
+  "Rewrite Section 1 (Intro) now that you know what the paper actually found",
+  "Abstract — written last, as always",
+  "Section 8 (Conclusion)",
+  {t:"Full read-through: does every claim C1–C4 have a named experiment?",k:1}]},
+
+{n:19,ph:6,dates:"11–17 Jan",gpu:2,goal:"Get honest eyes on it before reviewers do.",
+ deliv:"Reviewed draft, no known holes",
+ tasks:["Supervisor review",
+  "One external reader outside the project — ideally someone who will be blunt",
+  {t:"Self-review against the five reviewer questions; write the answers into the paper",k:1},
+  "Check every number in the text is traceable to a JSON in runs/"]},
+
+{n:20,ph:6,dates:"18–24 Jan",gpu:8,goal:"Revise.",
+ deliv:"Draft v2, at the page limit",
+ tasks:["Address all review comments",
+  "Rebuttal-proof in the main text: pseudo-mask reliability · ESI-vs-Grad-CAM · full fine-tuned MoA-DF",
+  "Tighten to the page limit",
+  "Draft v2"]},
+
+{n:21,ph:7,dates:"25–31 Jan",gpu:8,goal:"Absorb the one more experiment. Protected.",tag:"buffer",
+ deliv:"Review-driven experiment complete, figures regenerated",
+ tasks:["Run whatever the Week 19–20 review demanded",
+  "Regenerate affected figures via the manifest",
+  "Update the text"]},
+
+{n:22,ph:7,dates:"1–7 Feb",gpu:0,goal:"Reproducibility.",
+ deliv:"Anonymised repo, tested reproduce.sh, released checkpoints",
+ tasks:["Anonymised public repo",
+  "reproduce.sh — clone → download → train → evaluate, tested from scratch",
+  "Release checkpoints and the pseudo-mask pipeline",
+  {t:"Have someone else run reproduce.sh on a fresh Kaggle account",k:1},
+  "Final licence and ethics statement"]},
+
+{n:23,ph:7,dates:"8–14 Feb",gpu:0,goal:"Submit.",
+ deliv:"Submission receipt + arXiv preprint",
+ tasks:["Final proofread — fresh eyes, printed, out loud",
+  "Format check against the venue template — IEEE TIFS primary, rolling submission",
+  "Supplementary packaged",
+  {t:"Submit",k:1},
+  "arXiv preprint the same day"]},
+
+{n:24,ph:7,dates:"15–21 Feb",gpu:0,goal:"Slack.",tag:"buffer",
+ deliv:"Retrospective; optional workshop short version",
+ tasks:["Absorb any slip from Weeks 19–23",
+  "If unused: prepare the workshop short version (WIFS / CVPRW media forensics)",
+  "Write the retrospective — it becomes the design of the video study (Idea 4)"]}
+];
+
+const GATES = [
+{id:"G0",after:2,name:"Pseudo-mask viability",due:"Fri 18 Sep",
+ q:"What is the mean IoU of your pseudo-masks against SID-Set ground truth?",
+ opts:[["IoU ≥ 0.70","Full plan. DFBench becomes a localisation benchmark — a contribution in itself"],
+       ["IoU 0.50 – 0.70","Pseudo-masks for training only; evaluate localisation on annotated sets. Report the IoU honestly"],
+       ["IoU < 0.50","Drop DFBench localisation. Train and evaluate on SID-Set + MagicBrush + AutoSplice. C1 and C3 unaffected"],
+       ["Fallback available","INP-X ships 90K mask-paired triplets, so this gate is no longer existential — it decides scope, not survival"]]},
+{id:"G1",after:4,name:"Pipeline validated",due:"Fri 2 Oct",
+ q:"Does Exp-3 accuracy collapse to ≈ 0.50 across all five models, matching Shakya et al.?",
+ opts:[["Yes","Pipeline trusted. Proceed to the discovery phase"],
+       ["No","Your attack implementation or data split is wrong. Stop and fix before Week 5 — everything downstream depends on this"]]},
+{id:"G2",after:6,name:"Evidence drift confirmed?",due:"Fri 16 Oct",star:1,
+ q:"Does ESI fall substantially more than accuracy across at least two baselines?",
+ opts:[["Drift visible","C1 becomes the lead claim. The paper is a field-level finding plus a remedy. Retitle around it"],
+       ["Some methods only","Reframe: post-hoc explanations are unreliable under degradation, predicted masks are not. Weaker, still novel"],
+       ["No drift","Demote C1 to a secondary observation. Lead with C2 + C3. Do not spend Week 7 chasing it"]]},
+{id:"G3",after:9,name:"Method viability",due:"Fri 6 Nov",
+ q:"Does GRACE-DF beat the best CNN baseline on GAcc, ESI and CF, and does it train stably?",
+ opts:[["Beats baseline","Lock the architecture and move to tuning"],
+       ["Trains, no gain","Ablate the frequency branch (DCT / DWT / high-pass) before blaming the architecture"],
+       ["No gain after 2 weeks","Fall back to SegFormer-B2 / ConvNeXt-T dual-head. With NL rationale out of scope, this costs you nothing"]]},
+{id:"G4",after:13,name:"Experiments complete",due:"Fri 4 Dec",
+ q:"Does every table and figure in the paper skeleton have real numbers? The test set freezes here.",
+ opts:[["Complete","Freeze the test set. No further peeking. Move to writing"],
+       ["Incomplete","Use the Week 14 buffer. If still short after it, cut E8c then the debate module, in that order"]]},
+{id:"G5",after:19,name:"Submission-readiness",due:"Fri 15 Jan",
+ q:"Is the draft complete, reviewed, and free of known holes?",
+ opts:[["Ready","Revise in Week 20, harden, submit Week 23"],
+       ["Not ready","Weeks 20–21 absorb it; submission slips to Week 24, still inside the 6-month target"]]}
+];
+
+const TOTAL_GPU = WEEKS.reduce((s,w)=>s+w.gpu,0);
+const KEY = "gracedf.v1";
+let state = {tasks:{}, gates:{}, gpu:{}};
+let dbRef = null, saveTimer = null, lastWrite = 0;
+
+try{ const raw = localStorage.getItem(KEY); if(raw) state = Object.assign(state, JSON.parse(raw)); }catch(e){}
+
+/* ---------- current week ---------- */
+function weekPosition(){
+  const now = new Date();
+  const d = Math.floor((now - START)/864e5);
+  if(d < 0) return {idx:0, label:"starts in "+(-d)+"d"};
+  const idx = Math.min(24, Math.floor(d/7)+1);
+  if(d > 167) return {idx:25, label:"past week 24"};
+  return {idx, label:"week "+idx+" of 24"};
+}
+const POS = weekPosition();
+
+/* ---------- render ---------- */
+const timeline = document.getElementById("timeline");
+const rail = document.getElementById("rail");
+
+function taskId(w,i){ return "w"+w+"t"+i; }
+function taskText(t){ return typeof t === "string" ? t : t.t; }
+function isKey(t){ return typeof t === "object" && t.k; }
+
+function buildTimeline(){
+  let html = "";
+  PHASES.forEach((p, pi) => {
+    const pw = WEEKS.filter(w => w.ph === pi);
+    const gsum = pw.reduce((s,w)=>s+w.gpu,0);
+    html += `<div class="phase-h" id="phase${pi}">
+      <span class="rn">PHASE ${p.r}</span><h2>${p.name}</h2>
+      <span class="wr">weeks ${pw[0].n}–${pw[pw.length-1].n} &middot; ${gsum} GPU-h</span></div>`;
+    pw.forEach(w => {
+      html += weekHtml(w);
+      const g = GATES.find(x => x.after === w.n);
+      if(g) html += gateHtml(g);
+    });
+  });
+  timeline.innerHTML = html;
+}
+
+function weekHtml(w){
+  const tags = [];
+  if(w.n === POS.idx) tags.push('<span class="tag now">current</span>');
+  if(w.tag === "holiday") tags.push('<span class="tag hol">reduced capacity</span>');
+  if(w.tag === "buffer") tags.push('<span class="tag buf">protected</span>');
+  const items = w.tasks.map((t,i) => {
+    const id = taskId(w.n,i);
+    return `<li class="${isKey(t)?'key':''}">
+      <input type="checkbox" id="${id}" data-task="${id}">
+      <label for="${id}">${taskText(t)}</label></li>`;
+  }).join("");
+  return `<details class="wk" id="wk${w.n}" data-week="${w.n}"${w.n===POS.idx||(POS.idx===0&&w.n===1)?" open":""}>
+    <summary>
+      <span class="wnum"><b>${String(w.n).padStart(2,"0")}</b><span>week</span></span>
+      <span class="wmain">
+        <span class="wgoal">${w.goal}</span>
+        <span class="wmeta"><span class="date">${w.dates}</span>${tags.join("")}</span>
+      </span>
+      <span class="wright">
+        <span class="wcount" data-count="${w.n}">0/${w.tasks.length}</span>
+        <span class="wbar" data-bar="${w.n}"><i></i></span>
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </span>
+    </summary>
+    <div class="wbody">
+      <ul class="tasks">${items}</ul>
+      <div class="wfoot">
+        <span class="deliv"><b>Deliverable</b>${w.deliv}</span>
+        <span class="gpu" data-gpuwrap="${w.n}">
+          <label for="gpu${w.n}">GPU</label>
+          <input type="number" min="0" step="0.5" id="gpu${w.n}" data-gpu="${w.n}" placeholder="0">
+          <span class="of">/ ${w.gpu} h</span>
+        </span>
+      </div>
+    </div>
+  </details>`;
+}
+
+function gateHtml(g){
+  const opts = g.opts.map(o =>
+    `<li><span class="cond">${o[0]}</span><span>${o[1]}</span></li>`).join("");
+  return `<section class="gate${g.star?" star":""}" data-gate="${g.id}">
+    <div class="gate-head">
+      <span class="gate-id">GATE ${g.id}${g.star?" ★":""}</span>
+      <span class="gate-name">${g.name}</span>
+      <span class="gate-due">${g.due}</span>
+    </div>
+    <p class="gate-q">${g.q}</p>
+    <ul class="gate-opts">${opts}</ul>
+    <div class="seg" role="group" aria-label="Gate ${g.id} status">
+      <button type="button" data-gs="${g.id}" data-v="pending">Pending</button>
+      <button type="button" class="p" data-gs="${g.id}" data-v="passed">Passed</button>
+      <button type="button" class="f" data-gs="${g.id}" data-v="fallback">Fallback taken</button>
+    </div>
+  </section>`;
+}
+
+function buildRail(){
+  rail.innerHTML = PHASES.map((p,i) =>
+    `<button class="ph" data-ph="${i}">
+      <span class="pn">Phase ${p.r}</span>
+      <span class="pl">${p.name}</span>
+      <span class="bar"><i data-phbar="${i}"></i></span>
+    </button>`).join("");
+}
+
+/* ---------- state → UI ---------- */
+function refresh(){
+  let done = 0, total = 0, gpuSum = 0;
+
+  WEEKS.forEach(w => {
+    let d = 0;
+    w.tasks.forEach((t,i) => {
+      const id = taskId(w.n,i);
+      const on = !!state.tasks[id];
+      const el = document.getElementById(id);
+      if(el) el.checked = on;
+      if(on) d++;
+    });
+    done += d; total += w.tasks.length;
+
+    const pct = w.tasks.length ? d/w.tasks.length : 0;
+    const bar = document.querySelector(`[data-bar="${w.n}"]`);
+    if(bar){ bar.querySelector("i").style.width = (pct*100)+"%"; bar.classList.toggle("full", pct===1); }
+    const cnt = document.querySelector(`[data-count="${w.n}"]`);
+    if(cnt) cnt.textContent = d+"/"+w.tasks.length;
+    const card = document.getElementById("wk"+w.n);
+    if(card){ card.classList.toggle("done", pct===1); card.classList.toggle("now", w.n===POS.idx); }
+
+    const gv = state.gpu[w.n];
+    const gi = document.querySelector(`[data-gpu="${w.n}"]`);
+    if(gi && document.activeElement !== gi) gi.value = (gv===undefined||gv===null||gv==="") ? "" : gv;
+    const gw = document.querySelector(`[data-gpuwrap="${w.n}"]`);
+    if(gw) gw.classList.toggle("over", Number(gv) > w.gpu);
+    gpuSum += Number(gv) || 0;
+  });
+
+  PHASES.forEach((p,i) => {
+    const pw = WEEKS.filter(w => w.ph === i);
+    let d = 0, t = 0;
+    pw.forEach(w => { t += w.tasks.length; w.tasks.forEach((_,j) => { if(state.tasks[taskId(w.n,j)]) d++; }); });
+    const b = document.querySelector(`[data-phbar="${i}"]`);
+    if(b) b.style.width = (t ? d/t*100 : 0)+"%";
+  });
+
+  let gp = 0;
+  GATES.forEach(g => {
+    const v = state.gates[g.id] || "pending";
+    if(v !== "pending") gp++;
+    const sec = document.querySelector(`[data-gate="${g.id}"]`);
+    if(sec){
+      sec.classList.toggle("st-pass", v === "passed");
+      sec.classList.toggle("st-fall", v === "fallback");
+      sec.querySelectorAll("[data-gs]").forEach(b =>
+        b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+    }
+  });
+
+  const pct = total ? done/total : 0;
+  const C = 2*Math.PI*26;
+  const arc = document.getElementById("ringArc");
+  arc.style.strokeDashoffset = String(C*(1-pct));
+  arc.setAttribute("stroke-linecap", pct > 0.005 ? "round" : "butt");
+  document.getElementById("ringNum").textContent = Math.round(pct*100)+"%";
+  document.getElementById("sTasks").innerHTML = done+"<small>/"+total+"</small>";
+  document.getElementById("sGpu").innerHTML = (Math.round(gpuSum*10)/10)+"<small>/"+TOTAL_GPU+" h</small>";
+  document.getElementById("sGates").innerHTML = gp+"<small>/6</small>";
+
+  const daysLeft = Math.ceil((SUBMIT - new Date())/864e5);
+  document.getElementById("sWeek").innerHTML =
+    POS.label.replace(/^week (\d+).*/,"W$1") + "<small> &middot; " + (daysLeft>0 ? daysLeft+"d to submit" : "past target") + "</small>";
+}
+
+/* ---------- persistence ---------- */
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  if(!dbRef) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    lastWrite = Date.now();
+    dbRef.set({tasks:state.tasks, gates:state.gates, gpu:state.gpu, updatedAt:lastWrite})
+      .catch(() => {});
+  }, 600);
+}
+
+/* ---------- events ---------- */
+document.addEventListener("change", e => {
+  const t = e.target;
+  if(t.dataset && t.dataset.task){
+    if(t.checked) state.tasks[t.dataset.task] = 1; else delete state.tasks[t.dataset.task];
+    save(); refresh();
+  }
+  if(t.dataset && t.dataset.gpu){
+    const v = t.value.trim();
+    if(v === "") delete state.gpu[t.dataset.gpu]; else state.gpu[t.dataset.gpu] = Number(v);
+    save(); refresh();
+  }
+});
+document.addEventListener("input", e => {
+  if(e.target.dataset && e.target.dataset.gpu){
+    const t = e.target, v = t.value.trim();
+    if(v === "") delete state.gpu[t.dataset.gpu]; else state.gpu[t.dataset.gpu] = Number(v);
+    save(); refresh();
+  }
+});
+document.addEventListener("click", e => {
+  const gs = e.target.closest("[data-gs]");
+  if(gs){
+    const cur = state.gates[gs.dataset.gs] || "pending";
+    state.gates[gs.dataset.gs] = (cur === gs.dataset.v) ? "pending" : gs.dataset.v;
+    save(); refresh(); return;
+  }
+  const ph = e.target.closest("[data-ph]");
+  if(ph){
+    document.getElementById("phase"+ph.dataset.ph)
+      .scrollIntoView({behavior:"smooth", block:"start"});
+  }
+});
+
+let expanded = false;
+document.getElementById("btnExpand").addEventListener("click", e => {
+  expanded = !expanded;
+  document.querySelectorAll(".wk").forEach(d => { d.open = expanded; });
+  e.target.textContent = expanded ? "Collapse all" : "Expand all";
+});
+
+let armed = false, armTimer = null;
+document.getElementById("btnReset").addEventListener("click", e => {
+  if(!armed){
+    armed = true; e.target.textContent = "Confirm reset";
+    armTimer = setTimeout(() => { armed = false; e.target.textContent = "Reset"; }, 4000);
+    return;
+  }
+  clearTimeout(armTimer); armed = false; e.target.textContent = "Reset";
+  state = {tasks:{}, gates:{}, gpu:{}};
+  save(); refresh();
+});
+
+/* ---------- build ---------- */
+buildRail();
+buildTimeline();
+refresh();
+
+/* ---------- export / import ---------- */
+document.getElementById("btnSave").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({v:1, saved:new Date().toISOString(), state}, null, 2)],
+                        {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "grace-df-progress.json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+document.getElementById("fileLoad").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const d = JSON.parse(r.result);
+      const s = d.state || d;
+      state = {tasks:s.tasks||{}, gates:s.gates||{}, gpu:s.gpu||{}};
+      save(); refresh();
+      const t = document.getElementById("syncTxt");
+      t.textContent = "loaded from file";
+      setTimeout(() => { t.textContent = "saved in this browser"; }, 3000);
+    }catch(err){
+      document.getElementById("syncTxt").textContent = "could not read that file";
+    }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+});
+</script>
+
+</body>
+</html>

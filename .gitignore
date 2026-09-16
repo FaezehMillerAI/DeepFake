@@ -1,0 +1,38 @@
+# data & artefacts
+data/*
+!data/MANIFEST.md
+
+*.tar
+*.lmdb
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# runs: keep the JSON, drop the weights
+runs/**/*.pt
+runs/**/*.pth
+runs/**/checkpoints/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+*.egg-info/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# secrets
+kaggle.json
+.env

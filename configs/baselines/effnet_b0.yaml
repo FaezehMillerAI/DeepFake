@@ -1,0 +1,7 @@
+_base_: ../default.yaml
+name: baseline_effnet_b0
+model:
+  arch: efficientnet_b0
+train:
+  epochs: 8
+  lr: 1.0e-4

@@ -1,0 +1,36 @@
+# Base configuration. Experiment configs inherit from this via `_base_`.
+name: default
+seed: 0
+
+data:
+  root: /kaggle/input
+  train_shards: null
+  val_shards: null
+  test_shards: null
+  image_size: 224
+  num_workers: 2
+  batch_size: 32
+
+model:
+  arch: efficientnet_b0
+  pretrained: true
+  num_classes: 2
+
+train:
+  epochs: 8
+  lr: 1.0e-4
+  weight_decay: 0.01
+  optimizer: adamw
+  scheduler: cosine
+  amp: fp16          # never bf16 on P100/T4
+  grad_accum: 1
+  early_stop_patience: 2
+
+eval:
+  corruptions: [jpeg, blur, noise, downscale]
+  esi_reference: clean
+  gacc_tau: 0.5
+  ece_bins: 15
+
+log:
+  out_dir: runs
