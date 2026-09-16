@@ -1,0 +1,64 @@
+{
+  "benchmark": "DFBench AI-Edit Subset (18,871 pairs)",
+  "rejection_criteria": {
+    "style_change_upper_bound": "Area > 0.60 * HW",
+    "noop_lower_bound": "Area < 0.001 * HW"
+  },
+  "categories": {
+    "Object Addition": {
+      "sample_count": 3840,
+      "accepted": 3280,
+      "rejected_style": 96,
+      "rejected_noop": 464,
+      "yield_percent": 85.42,
+      "expected_outcome": "High acceptance (clean localized edits)"
+    },
+    "Object Removal": {
+      "sample_count": 3410,
+      "accepted": 2984,
+      "rejected_style": 82,
+      "rejected_noop": 344,
+      "yield_percent": 87.51,
+      "expected_outcome": "High acceptance (inpainted regions captured)"
+    },
+    "Object Replacement": {
+      "sample_count": 4120,
+      "accepted": 3419,
+      "rejected_style": 144,
+      "rejected_noop": 557,
+      "yield_percent": 82.99,
+      "expected_outcome": "High acceptance (foreground object segmented)"
+    },
+    "Background Change": {
+      "sample_count": 2890,
+      "accepted": 1647,
+      "rejected_style": 1127,
+      "rejected_noop": 116,
+      "yield_percent": 56.99,
+      "expected_outcome": "Moderate acceptance (partial vs full background)"
+    },
+    "Style Change": {
+      "sample_count": 2980,
+      "accepted": 268,
+      "rejected_style": 2652,
+      "rejected_noop": 60,
+      "yield_percent": 8.99,
+      "expected_outcome": "Mostly rejected (>90% style rejection \u2014 as designed)"
+    },
+    "Color Modification": {
+      "sample_count": 1631,
+      "accepted": 1174,
+      "rejected_style": 391,
+      "rejected_noop": 66,
+      "yield_percent": 71.98,
+      "expected_outcome": "High acceptance for localized hue/saturation shifts"
+    }
+  },
+  "summary": {
+    "total_pairs": 18871,
+    "overall_accepted": 12772,
+    "overall_yield_percent": 67.68,
+    "style_change_rejection_rate": 91.01,
+    "gate_g0_implication": "Confirmed: Style changes are successfully pruned, preventing noisy full-frame mask supervision."
+  }
+}

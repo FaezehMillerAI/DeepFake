@@ -83,7 +83,9 @@ def generate_pseudo_mask(
     arr_edit = _ensure_rgb_array(img_edit)
 
     if arr_real.shape[:2] != arr_edit.shape[:2]:
-        raise ValueError(f"Spatial shapes differ: {arr_real.shape[:2]} vs {arr_edit.shape[:2]}")
+        h_edit, w_edit = arr_edit.shape[:2]
+        img_real_pil = Image.fromarray(arr_real).resize((w_edit, h_edit), Image.BILINEAR)
+        arr_real = np.asarray(img_real_pil)
 
     h, w = arr_real.shape[:2]
     total_pixels = h * w
