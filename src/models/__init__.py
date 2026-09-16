@@ -1,7 +1,9 @@
-"""Backbones, the frequency encoder and GRACE-DF.
+"""Model architectures for GRACE-DF."""
+from .baselines import BaselineClassifier, ARCNet, build_model
 
-Week 8 onward:
-  - freq.py     : DCT + DWT + high-pass -> f_tokens
-  - grace_df.py : [v_tokens ; f_tokens ; prompt] -> class + mask + rationale
-  - baselines.py: the five Shakya architectures and ARC-Net
-"""
+__all__ = [
+    "BaselineClassifier",
+    "ARCNet",
+    "build_model",
+]
+
